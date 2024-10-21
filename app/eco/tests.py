@@ -43,4 +43,4 @@ class CreateOrganizationTestCase(TestCase):
         self.assertEqual(response.status_code, 201)
         response = c.post("/eco/create_org", {"name": "OO-1", "coord_x": 5.2, "coord_y": 12.7})
         self.assertEqual(response.status_code, 400)
-        
+
