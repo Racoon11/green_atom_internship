@@ -17,7 +17,7 @@ class OrganizationTestCase(TestCase):
         org1 = Organization.objects.get(name="OO-1")
         self.assertEqual(org1.get_name(), "OO-1")
         self.assertEqual(org1.get_coords(), (5, 3.3))
-        self.assertEqual(org1.get_waste(), {i: 0.0 for i in wastes})
+        self.assertEqual(org1.get_waste(), {"bio": 10.5, "glass": 13.7, "plastic": 0})
 
     def test_org_generate(self):
         org1 = Organization.objects.get(name="OO-1")
@@ -28,3 +28,19 @@ class OrganizationTestCase(TestCase):
         org1.send_to_storage('bio', 8)
         org1.send_to_storage("glass", 15)
         self.assertEqual(org1.get_waste(), {"bio": 2.5, "glass": 13.7, "plastic": 0})
+
+
+class CreateOrganizationTestCase(TestCase):
+
+    def test_org_create(self):
+        c = Client()
+        response = c.post("/eco/create_org", {"name": "OO-1", "coord_x": 5.2, "coord_y": 12.7})
+        self.assertEqual(response.status_code, 201)
+
+    def test_org_with_same_names(self):
+        c = Client()
+        response = c.post("/eco/create_org", {"name": "OO-1", "coord_x": 5.2, "coord_y": 12.7})
+        self.assertEqual(response.status_code, 201)
+        response = c.post("/eco/create_org", {"name": "OO-1", "coord_x": 5.2, "coord_y": 12.7})
+        self.assertEqual(response.status_code, 400)
+        
