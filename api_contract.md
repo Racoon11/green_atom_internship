@@ -39,9 +39,7 @@ HTTP Status:
 Request (Получить организацию по имени)
     URI: /organization?name={s}
     HTTP Verb: GET
-    Body example: {
-        "name": "OO-1"
-    }
+    
 Response:
 HTTP Status:
     200 OK Если организация существует
@@ -63,9 +61,7 @@ HTTP Status:
 Request (Получить хранилище по имени)
     URI: /storage?name={s}
     HTTP Verb: GET
-    Body example: {
-        "name": "MHO-1"
-    }
+    
 Response:
 HTTP Status:
     200 OK Если хранилище с таким именем существует

@@ -2,7 +2,6 @@ from django.test import TestCase
 from django.test import Client
 from .models import Storage, Organization
 
-
 wastes = ['bio', 'glass', 'plastic']
 
 
@@ -104,3 +103,36 @@ class CreateStorageTestCase(TestCase):
         self.assertEqual(response.status_code, 400)
 
 
+class GetBuildingTestCase(TestCase):
+    def setUp(self):
+        c = Client()
+        c.post("/eco/create_org", {"name": "OO-1", "coord_x": 5.2, "coord_y": 5.4})
+        c.post("/eco/create_storage", {"name": "MHO-1", "coord_x": 5.2, "coord_y": 12.7,
+                                       "max_bio": 100, "max_glass": 0, "max_plastic": 130})
+
+    def test_get_org(self):
+        c = Client()
+        response = c.get("/eco/organization?name=OO-1")
+        self.assertEqual(response.json(),
+                         {"name": "OO-1",
+                          "id": 1,
+                          "coord_x": 5.2, "coord_y": 5.4,
+                          "cur_bio": 0, "cur_glass": 0, "cur_plastic": 0})
+
+    def test_get_not_existing_org(self):
+        c = Client()
+        response = c.get("/eco/organization?name=OO-2")
+        self.assertEqual(response.status_code, 404)
+
+    def test_get_st(self):
+        c = Client()
+        response = c.get("/eco/storage?name=MHO-1")
+        self.assertEqual(response.json(),
+                         {"name": "MHO-1", "id": 1,
+                          "coord_x": 5.2, "coord_y": 12.7,
+                          "max_bio": 100, "max_glass": 0, "max_plastic": 130})
+
+    def test_get_not_existing_st(self):
+        c = Client()
+        response = c.get("/eco/storage?name=OO-2")
+        self.assertEqual(response.status_code, 404)
