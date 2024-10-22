@@ -266,3 +266,23 @@ class SendTestCase(TestCase):
         response = c.post("/eco/send_automatically",
                           {"name": "OO-1", "type": "sdfghjk"})
         self.assertEqual(response.status_code, 400)
+
+
+class ClosestStorageTestCase(TestCase):
+
+    def setUp(self):
+        c = Client()
+        c.post("/eco/create_org", {"name": "OO-1", "coord_x": 5, "coord_y": 5})
+
+        c.post("/eco/create_storage", {"name": "MHO-1", "coord_x": 2, "coord_y": 3,
+                                       "max_bio": 40, "max_glass": 20, "max_plastic": 130})
+        c.post("/eco/create_storage", {"name": "MHO-2", "coord_x": 15, "coord_y": 15,
+                                       "max_bio": 0, "max_glass": 60, "max_plastic": 130})
+
+    def test_closest_storage(self):
+        c = Client()
+        response = c.get("/eco/closest_storage", {"name": "OO-1"})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"name": "MHO-1",
+                                           "bio": 40, "glass": 20, "plastic": 130})
+
