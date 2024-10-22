@@ -9,8 +9,8 @@ def create_org(request):
     if request.method == 'POST':
         try:
             name = request.POST['name']
-            coord_x = request.POST['coord_x']
-            coord_y = request.POST['coord_y']
+            coord_x = float(request.POST['coord_x'])
+            coord_y = float(request.POST['coord_y'])
         except:
             return HttpResponseBadRequest("Incorrect values")
         if Organization.objects.filter(name=name):

@@ -44,3 +44,63 @@ class CreateOrganizationTestCase(TestCase):
         response = c.post("/eco/create_org", {"name": "OO-1", "coord_x": 5.2, "coord_y": 12.7})
         self.assertEqual(response.status_code, 400)
 
+    def test_org_with_same_coords(self):
+        c = Client()
+        response = c.post("/eco/create_org", {"name": "OO-1", "coord_x": 5.2, "coord_y": 12.7})
+        self.assertEqual(response.status_code, 201)
+        response = c.post("/eco/create_org", {"name": "OO-2", "coord_x": 5.2, "coord_y": 12.7})
+        self.assertEqual(response.status_code, 201)
+
+    def test_org_with_strange_coords(self):
+        c = Client()
+        response = c.post("/eco/create_org", {"name": "OO-1", "coord_x": "5.2", "coord_y": 12.7})
+        self.assertEqual(response.status_code, 201)
+        response = c.post("/eco/create_org", {"name": "OO-2", "coord_x": "5.2", "coord_y": "sdfghj"})
+        self.assertEqual(response.status_code, 400)
+
+
+class StorageTestCase(TestCase):
+    def setUp(self):
+        st1 = Storage(coord_x=5, coord_y=3.3, name="MHO-1", max_bio=100, max_glass=130, max_plastic=0)
+        st1.save()
+
+    def test_st_create(self):
+        st1 = Storage.objects.get(name="MHO-1")
+        self.assertEqual(st1.get_name(), "MHO-1")
+        self.assertEqual(st1.get_coords(), (5, 3.3))
+        self.assertEqual(st1.get_waste(), {"bio": 0, "glass": 0, "plastic": 0})
+        self.assertEqual(st1.get_free_space(), {"bio": 100, "glass": 130, "plastic": 0})
+
+    def test_st_store(self):
+        org1 = Storage.objects.get(name="MHO-1")
+        org1.store("bio", 80)
+        self.assertEqual(org1.get_free_space()['bio'], 20)
+        ans = org1.store("bio", 30)
+        self.assertEqual(org1.get_free_space()['bio'], 20)
+        self.assertEqual(ans, False)
+
+
+class CreateStorageTestCase(TestCase):
+
+    def test_st_create(self):
+        c = Client()
+        response = c.post("/eco/create_storage", {"name": "MHO-1", "coord_x": 5.2, "coord_y": 12.7,
+                                                  "max_bio": 100, "max_glass": 0, "max_plastic": 130})
+        self.assertEqual(response.status_code, 201)
+
+    def test_st_with_same_names(self):
+        c = Client()
+        response = c.post("/eco/create_storage", {"name": "MHO-1", "coord_x": 5.2, "coord_y": 12.7,
+                                                  "max_bio": 100, "max_glass": 0, "max_plastic": 130})
+        self.assertEqual(response.status_code, 201)
+        response = c.post("/eco/create_storage", {"name": "MHO-1", "coord_x": 5.2, "coord_y": 12.7,
+                                                  "max_bio": 100, "max_glass": 0, "max_plastic": 130})
+        self.assertEqual(response.status_code, 400)
+
+    def test_org_with_strange_coords(self):
+        c = Client()
+        response = c.post("/eco/create_storage", {"name": "MHO-1", "coord_x": 5.2, "coord_y": "abc",
+                                                  "max_bio": 100, "max_glass": 0, "max_plastic": 130})
+        self.assertEqual(response.status_code, 400)
+
+
