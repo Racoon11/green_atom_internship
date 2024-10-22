@@ -37,7 +37,7 @@ HTTP Status:
 
 ```
 Request (Получить организацию по имени)
-    URI: /organization?name={s}
+    URI: /organization/{name}
     HTTP Verb: GET
     
 Response:
@@ -59,7 +59,7 @@ HTTP Status:
 
 ```
 Request (Получить хранилище по имени)
-    URI: /storage?name={s}
+    URI: /storage/{name}
     HTTP Verb: GET
     
 Response:
@@ -95,6 +95,7 @@ Response:
 HTTP Status:
     200 OK
     404 Not Found
+    400 
 ```
 
 ```

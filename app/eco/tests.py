@@ -143,3 +143,33 @@ class GetBuildingTestCase(TestCase):
         c = Client()
         response = c.get("/eco/storage/OO-2/")
         self.assertEqual(response.status_code, 404)
+
+
+class GenerateTestCase(TestCase):
+
+    def setUp(self):
+        c = Client()
+        c.post("/eco/create_org", {"name": "OO-1", "coord_x": 5.2, "coord_y": 12.7})
+
+    def test_generate(self):
+        c = Client()
+        resp1 = c.post("/eco/generate", {"name": "OO-1",
+                                 "type": "bio", "amount": 6.4})
+        self.assertEqual(resp1.status_code, 200)
+
+        resp2 = c.get("/eco/organization/OO-1/").json()
+        self.assertEqual(resp2['cur_bio'], 6.4)
+        self.assertEqual(resp2['cur_glass'], 0)
+        self.assertEqual(resp2['cur_plastic'], 0)
+
+    def test_generate_org_not_exists(self):
+        c = Client()
+        resp1 = c.post("/eco/generate", {"name": "OO-2",
+                                 "type": "bio", "amount": 6.4})
+        self.assertEqual(resp1.status_code, 404)
+
+    def test_generate_incorrect_amount(self):
+        c = Client()
+        resp1 = c.post("/eco/generate", {"name": "OO-1",
+                                 "type": "bio", "amount": "dfghjk"})
+        self.assertEqual(resp1.status_code, 400)
