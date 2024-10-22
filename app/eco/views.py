@@ -1,10 +1,15 @@
 from django.http import HttpResponse, Http404
 from django.http import HttpResponseBadRequest
 from .models import Storage, Organization
+from django.shortcuts import get_object_or_404, render
+from django.middleware.csrf import get_token
+import json
 
 
 def index(request):
-    return HttpResponse("Hello, world. You're at the polls index.")
+    csrf = get_token(request)
+    content = {"csrf": csrf}
+    return HttpResponse(json.dumps(content), content_type="application/json")
 
 
 def create_org(request):
@@ -20,7 +25,7 @@ def create_org(request):
         org = Organization(name=name, coord_x=coord_x, coord_y=coord_y)
         org.save()
         return HttpResponse(status=201)
-    return Http404("Page not found")
+    raise Http404("Page not found")
 
 
 def create_storage(request):
@@ -40,4 +45,40 @@ def create_storage(request):
                      max_bio=max_bio, max_plastic=max_plastic, max_glass=max_glass)
         st.save()
         return HttpResponse(status=201)
-    return Http404("Page not found")
+    raise Http404("Page not found")
+
+
+def get_org(request, name):
+    if not Organization.objects:
+        raise Http404(f"Organization with name: {name} not found")
+    org = Organization.objects.filter(name=name).first()
+    if not org:
+        raise Http404(f"Organization with name: {name} not found")
+    content = {
+        "id": org.id,
+        "name": org.get_name(),
+        "coord_x": org.coord_x,
+        "coord_y": org.coord_y
+    }
+    content |= org.get_waste()
+    return HttpResponse(json.dumps(content), content_type="application/json")
+
+
+def get_storage(request, name):
+    if not Storage.objects:
+        raise Http404(f"Storage with name: {name} not found")
+    org = Storage.objects.filter(name=name).first()
+    if not org:
+        raise Http404(f"Storage with name: {name} not found")
+    content = {
+        "id": org.id,
+        "name": org.get_name(),
+        "coord_x": org.coord_x,
+        "coord_y": org.coord_y,
+        "max_bio": org.max_bio,
+        "max_glass": org.max_glass,
+        "max_plastic": org.max_plastic
+    }
+    content |= org.get_waste()
+    return HttpResponse(json.dumps(content), content_type="application/json")
+

@@ -16,17 +16,17 @@ class OrganizationTestCase(TestCase):
         org1 = Organization.objects.get(name="OO-1")
         self.assertEqual(org1.get_name(), "OO-1")
         self.assertEqual(org1.get_coords(), (5, 3.3))
-        self.assertEqual(org1.get_waste(), {"bio": 10.5, "glass": 13.7, "plastic": 0})
+        self.assertEqual(org1.get_waste(), {"cur_bio": 10.5, "cur_glass": 13.7, "cur_plastic": 0})
 
     def test_org_generate(self):
         org1 = Organization.objects.get(name="OO-1")
-        self.assertEqual(org1.get_waste()['bio'], 10.5)
+        self.assertEqual(org1.get_waste()['cur_bio'], 10.5)
 
     def test_org_send(self):
         org1 = Organization.objects.get(name="OO-1")
         org1.send_to_storage('bio', 8)
         org1.send_to_storage("glass", 15)
-        self.assertEqual(org1.get_waste(), {"bio": 2.5, "glass": 13.7, "plastic": 0})
+        self.assertEqual(org1.get_waste(), {"cur_bio": 2.5, "cur_glass": 13.7, "cur_plastic": 0})
 
 
 class CreateOrganizationTestCase(TestCase):
@@ -67,7 +67,7 @@ class StorageTestCase(TestCase):
         st1 = Storage.objects.get(name="MHO-1")
         self.assertEqual(st1.get_name(), "MHO-1")
         self.assertEqual(st1.get_coords(), (5, 3.3))
-        self.assertEqual(st1.get_waste(), {"bio": 0, "glass": 0, "plastic": 0})
+        self.assertEqual(st1.get_waste(), {"cur_bio": 0, "cur_glass": 0, "cur_plastic": 0})
         self.assertEqual(st1.get_free_space(), {"bio": 100, "glass": 130, "plastic": 0})
 
     def test_st_store(self):
@@ -112,27 +112,34 @@ class GetBuildingTestCase(TestCase):
 
     def test_get_org(self):
         c = Client()
-        response = c.get("/eco/organization?name=OO-1")
-        self.assertEqual(response.json(),
-                         {"name": "OO-1",
-                          "id": 1,
-                          "coord_x": 5.2, "coord_y": 5.4,
-                          "cur_bio": 0, "cur_glass": 0, "cur_plastic": 0})
+        response = c.get("/eco/organization/OO-1/")
+        r = response.json()
+        self.assertEqual(r['name'], 'OO-1')
+        self.assertEqual(r['id'], 1)
+        self.assertEqual(r['coord_x'], 5.2)
+        self.assertEqual(r['coord_y'], 5.4)
+        self.assertEqual(r['cur_bio'], 0)
+        self.assertEqual(r['cur_glass'], 0)
+        self.assertEqual(r['cur_plastic'], 0)
 
     def test_get_not_existing_org(self):
         c = Client()
-        response = c.get("/eco/organization?name=OO-2")
+        response = c.get("/eco/organization/OO-2/")
         self.assertEqual(response.status_code, 404)
 
     def test_get_st(self):
         c = Client()
-        response = c.get("/eco/storage?name=MHO-1")
-        self.assertEqual(response.json(),
-                         {"name": "MHO-1", "id": 1,
-                          "coord_x": 5.2, "coord_y": 12.7,
-                          "max_bio": 100, "max_glass": 0, "max_plastic": 130})
+        response = c.get("/eco/storage/MHO-1/")
+        r = response.json()
+        self.assertEqual(r['name'], 'MHO-1')
+        self.assertEqual(r['id'], 1)
+        self.assertEqual(r['coord_x'], 5.2)
+        self.assertEqual(r['coord_y'], 12.7)
+        self.assertEqual(r['max_bio'], 100)
+        self.assertEqual(r['max_glass'], 0)
+        self.assertEqual(r['max_plastic'], 130)
 
     def test_get_not_existing_st(self):
         c = Client()
-        response = c.get("/eco/storage?name=OO-2")
+        response = c.get("/eco/storage/OO-2/")
         self.assertEqual(response.status_code, 404)

@@ -14,7 +14,7 @@ class Building(models.Model):
         return self.coord_x, self.coord_y
 
     def get_waste(self):
-        return {"bio": self.cur_bio, "glass": self.cur_glass, "plastic": self.cur_plastic}
+        return {"cur_bio": self.cur_bio, "cur_glass": self.cur_glass, "cur_plastic": self.cur_plastic}
 
     def get_name(self):
         return self.name
