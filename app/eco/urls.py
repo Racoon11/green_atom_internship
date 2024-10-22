@@ -9,5 +9,6 @@ urlpatterns = [
     path("organization/<str:name>/", views.get_org),
     path("storage/<str:name>/", views.get_storage),
     path("generate", views.generate),
-    path("send_automatically", views.send, name='send_automatically')
+    path("send_automatically", views.send, name='send_automatically'),
+    path("closest_storage", views.closest_storage)
 ]

@@ -284,5 +284,5 @@ class ClosestStorageTestCase(TestCase):
         response = c.get("/eco/closest_storage", {"name": "OO-1"})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {"name": "MHO-1",
-                                           "bio": 40, "glass": 20, "plastic": 130})
+                                           "free_space": {"bio": 40, "glass": 20, "plastic": 130}})
 

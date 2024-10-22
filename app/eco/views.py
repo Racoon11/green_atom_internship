@@ -138,7 +138,7 @@ def send(request):
 
         answer = {}
         while amount:
-            st = get_closest_station(org.get_coords(), waste_type)
+            st = get_closest_storage(org.get_coords(), waste_type)
             if st is None and not answer:
                 raise Http404(f"No free storage")
             if st is None and answer:
@@ -158,19 +158,37 @@ def send(request):
     raise Http404("Page not found")
 
 
-def get_closest_station(coords, free_waste):
+def get_closest_storage(coords, free_waste=None):
     if not Storage.objects.all():
         return None
     st_closest = None
     dist = float('inf')
     for storage in Storage.objects.all():
-        if (storage.get_free_space()[free_waste] == 0):
+        if (free_waste is not None and
+                storage.get_free_space()[free_waste] == 0):
             continue
         cur_dist = distance(coords, storage.get_coords())
         if cur_dist < dist:
             dist = cur_dist
             st_closest = storage
     return st_closest
+
+
+def closest_storage(request):
+    try:
+        name = request.GET['name']
+    except:
+        return HttpResponseBadRequest("Incorrect values")
+    org = Organization.objects.filter(name=name).first()
+    if not org:
+        raise Http404(f"Organization with name: {name} not found")
+    st = get_closest_storage(org.get_coords())
+    if st is None:
+        raise Http404(f"No free storage")
+    content = {"name": st.get_name(),
+               "free_space": st.get_free_space()}
+    return HttpResponse(json.dumps(content), content_type="application/json")
+
 
 def distance(coords1, coords2):
     return sqrt((coords1[0] - coords2[0])**2 + (coords1[1] - coords2[1])**2)
