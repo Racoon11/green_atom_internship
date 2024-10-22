@@ -1,6 +1,6 @@
 ## API Contract
 
-```
+```text
 Request (Создать организацию)
     URI: /create_org
     HTTP Verb: POST
@@ -16,7 +16,7 @@ HTTP Status:
     400 Bad Request - Организация не создана
 ```
 
-```
+```text
 Request (Создать хранилище)
     URI: /create_storage
     HTTP Verb: POST
@@ -35,7 +35,7 @@ HTTP Status:
     400 Bad Request - Хранилище не создано
 ```
 
-```
+```text
 Request (Получить организацию по имени)
     URI: /organization/{name}
     HTTP Verb: GET
@@ -57,7 +57,7 @@ HTTP Status:
     404 Not Found
 ```
 
-```
+```text
 Request (Получить хранилище по имени)
     URI: /storage/{name}
     HTTP Verb: GET
@@ -82,7 +82,7 @@ HTTP Status:
     404 Not Found
 ```
 
-```
+```text
 Request Организация генерирует отходы
     URI: /generate
     HTTP Verb: POST
@@ -98,7 +98,7 @@ HTTP Status:
     400 Bad Request
 ```
 
-```
+```text
 Request Организация отправляет отходы в Хранилище (выбор хранилища
  происходит автоматически, если не указать количество - оправить все, 
 что есть)
@@ -120,11 +120,11 @@ HTTP Status:
     Body example: {
         "MHO-1": 12.4
     }
-    404 Not Found (Organisation not found)
-    400 Bad Request (Request is incorrect)
+    404 Not Found (Organisation or storage not found)
+    400 Bad Request 
 ```
 
-```
+```text
 Request Ближайшее свободное хранилище
     URI: /closest_storage
     HTTP Verb: GET
@@ -142,7 +142,7 @@ HTTP Status:
     404 Not Found
 ```
 
-```
+```text
 Request 
     URI:
     HTTP Verb: 

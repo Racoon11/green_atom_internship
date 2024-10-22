@@ -8,5 +8,6 @@ urlpatterns = [
     path("create_storage", views.create_storage, name='create_storage'),
     path("organization/<str:name>/", views.get_org),
     path("storage/<str:name>/", views.get_storage),
-    path("generate", views.generate)
+    path("generate", views.generate),
+    path("send_automatically", views.send, name='send_automatically')
 ]

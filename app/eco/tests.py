@@ -200,7 +200,7 @@ class SendTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
         response = response.json()
-        self.assertEqueal(response, {"MHO-1": 30})
+        self.assertEqual(response, {"MHO-1": 30})
 
         response = c.get("/eco/organization/OO-1/").json()
         self.assertEqual(response['cur_bio'], 0)
@@ -215,8 +215,8 @@ class SendTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
         response = response.json()
-        self.assertEqueal(response, {"MHO-1": 20,
-                                     "MHO-2": 10})
+        self.assertEqual(response, {"MHO-1": 20,
+                                    "MHO-2": 10})
 
         response = c.get("/eco/organization/OO-1/").json()
         self.assertEqual(response['cur_glass'], 0)
@@ -234,9 +234,9 @@ class SendTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
         response = response.json()
-        self.assertEqueal(response, {"MHO-1": 20,
-                                     "MHO-2": 60,
-                                     "OO-2": 20},)
+        self.assertEqual(response, {"MHO-1": 20,
+                                    "MHO-2": 60,
+                                    "OO-2": 20}, )
 
         response = c.get("/eco/organization/OO-2/").json()
         self.assertEqual(response['cur_glass'], 20)
@@ -246,6 +246,14 @@ class SendTestCase(TestCase):
 
         response = c.get("/eco/storage/MHO-2/").json()
         self.assertEqual(response['cur_glass'], 60)
+
+    def test_no_space_at_all(self):
+        c = Client()
+        c.post("/eco/send_automatically",
+               {"name": "OO-2", "type": "glass"})
+        response = c.post("/eco/send_automatically",
+                          {"name": "OO-1", "type": "glass"})
+        self.assertEqual(response.status_code, 404)
 
     def test_not_existing_org(self):
         c = Client()
