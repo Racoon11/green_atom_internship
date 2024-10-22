@@ -173,3 +173,88 @@ class GenerateTestCase(TestCase):
         resp1 = c.post("/eco/generate", {"name": "OO-1",
                                          "type": "bio", "amount": "dfghjk"})
         self.assertEqual(resp1.status_code, 400)
+
+
+class SendTestCase(TestCase):
+
+    def setUp(self):
+        c = Client()
+        c.post("/eco/create_org", {"name": "OO-1", "coord_x": 5, "coord_y": 5})
+        c.post("/eco/create_org", {"name": "OO-2", "coord_x": 10, "coord_y": 10})
+        c.post("/eco/generate", {"name": "OO-1",
+                                 "type": "bio", "amount": 30})
+        c.post("/eco/generate", {"name": "OO-1",
+                                 "type": "glass", "amount": 30})
+        c.post("/eco/generate", {"name": "OO-2",
+                                 "type": "glass", "amount": 100})
+
+        c.post("/eco/create_storage", {"name": "MHO-1", "coord_x": 2, "coord_y": 3,
+                                       "max_bio": 40, "max_glass": 20, "max_plastic": 130})
+        c.post("/eco/create_storage", {"name": "MHO-2", "coord_x": 15, "coord_y": 15,
+                                       "max_bio": 0, "max_glass": 60, "max_plastic": 130})
+
+    def test_send_full(self):
+        c = Client()
+        response = c.post("/eco/send_automatically",
+                          {"name": "OO-1", "type": "bio"})
+        self.assertEqual(response.status_code, 200)
+
+        response = response.json()
+        self.assertEqueal(response, {"MHO-1": 30})
+
+        response = c.get("/eco/organization/OO-1/").json()
+        self.assertEqual(response['cur_bio'], 0)
+
+        response = c.get("/eco/storage/MHO-1/").json()
+        self.assertEqual(response['cur_bio'], 30)
+
+    def test_send_to_few_storages(self):
+        c = Client()
+        response = c.post("/eco/send_automatically",
+                          {"name": "OO-1", "type": "glass"})
+        self.assertEqual(response.status_code, 200)
+
+        response = response.json()
+        self.assertEqueal(response, {"MHO-1": 20,
+                                     "MHO-2": 10})
+
+        response = c.get("/eco/organization/OO-1/").json()
+        self.assertEqual(response['cur_glass'], 0)
+
+        response = c.get("/eco/storage/MHO-1/").json()
+        self.assertEqual(response['cur_glass'], 20)
+
+        response = c.get("/eco/storage/MHO-2/").json()
+        self.assertEqual(response['cur_glass'], 10)
+
+    def test_not_enough_space(self):
+        c = Client()
+        response = c.post("/eco/send_automatically",
+                          {"name": "OO-2", "type": "glass"})
+        self.assertEqual(response.status_code, 200)
+
+        response = response.json()
+        self.assertEqueal(response, {"MHO-1": 20,
+                                     "MHO-2": 60,
+                                     "OO-2": 20},)
+
+        response = c.get("/eco/organization/OO-2/").json()
+        self.assertEqual(response['cur_glass'], 20)
+
+        response = c.get("/eco/storage/MHO-1/").json()
+        self.assertEqual(response['cur_glass'], 20)
+
+        response = c.get("/eco/storage/MHO-2/").json()
+        self.assertEqual(response['cur_glass'], 60)
+
+    def test_not_existing_org(self):
+        c = Client()
+        response = c.post("/eco/send_automatically",
+                          {"name": "OO-3", "type": "glass"})
+        self.assertEqual(response.status_code, 404)
+
+    def test_incorrect_type(self):
+        c = Client()
+        response = c.post("/eco/send_automatically",
+                          {"name": "OO-1", "type": "sdfghjk"})
+        self.assertEqual(response.status_code, 400)

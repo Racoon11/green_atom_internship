@@ -95,12 +95,13 @@ Response:
 HTTP Status:
     200 OK
     404 Not Found
-    400 
+    400 Bad Request
 ```
 
 ```
 Request Организация отправляет отходы в Хранилище (выбор хранилища
- происходит автоматически)
+ происходит автоматически, если не указать количество - оправить все, 
+что есть)
     URI: /send_automatically
     HTTP Verb: POST
     Body example: {
@@ -108,6 +109,10 @@ Request Организация отправляет отходы в Хранил
         "type": "bio",
         "amount": 12.4
     }
+    Body example: {
+        "name": "OO-1",
+        "type": "bio"
+    } 
 Response:
 HTTP Status:
     200 OK Отходы были направлены в Хранилище, возвращаются хранилища и
@@ -115,7 +120,8 @@ HTTP Status:
     Body example: {
         "MHO-1": 12.4
     }
-    404 Not Found
+    404 Not Found (Organisation not found)
+    400 Bad Request (Request is incorrect)
 ```
 
 ```
