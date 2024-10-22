@@ -154,7 +154,7 @@ class GenerateTestCase(TestCase):
     def test_generate(self):
         c = Client()
         resp1 = c.post("/eco/generate", {"name": "OO-1",
-                                 "type": "bio", "amount": 6.4})
+                                         "type": "bio", "amount": 6.4})
         self.assertEqual(resp1.status_code, 200)
 
         resp2 = c.get("/eco/organization/OO-1/").json()
@@ -165,11 +165,11 @@ class GenerateTestCase(TestCase):
     def test_generate_org_not_exists(self):
         c = Client()
         resp1 = c.post("/eco/generate", {"name": "OO-2",
-                                 "type": "bio", "amount": 6.4})
+                                         "type": "bio", "amount": 6.4})
         self.assertEqual(resp1.status_code, 404)
 
     def test_generate_incorrect_amount(self):
         c = Client()
         resp1 = c.post("/eco/generate", {"name": "OO-1",
-                                 "type": "bio", "amount": "dfghjk"})
+                                         "type": "bio", "amount": "dfghjk"})
         self.assertEqual(resp1.status_code, 400)

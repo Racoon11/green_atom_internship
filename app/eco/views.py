@@ -82,3 +82,19 @@ def get_storage(request, name):
     content |= org.get_waste()
     return HttpResponse(json.dumps(content), content_type="application/json")
 
+
+def generate(request):
+    if request.method == 'POST':
+        try:
+            name = request.POST['name']
+            waste_type = request.POST['type']
+            amount = float(request.POST['amount'])
+        except:
+            return HttpResponseBadRequest("Incorrect values")
+        org = Organization.objects.filter(name=name).first()
+        if not org:
+            raise Http404(f"Organization with name: {name} not found")
+        org.generate(waste_type, amount)
+        org.save()
+        return HttpResponse("OK")
+    raise Http404("Page not found")
