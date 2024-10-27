@@ -190,5 +190,21 @@ def closest_storage(request):
     return HttpResponse(json.dumps(content), content_type="application/json")
 
 
+def get_all_storages(request):
+    if request.method == "GET":
+        name = request.GET['name']
+        org = Organization.objects.filter(name=name).first()
+        if not org:
+            raise Http404(f"Organization with name: {name} not found")
+        ans = {}
+        for storage in Storage.objects.all():
+            ans[storage.id] = {
+                "name": storage.get_name(),
+                "free_space": storage.get_free_space(),
+                "distance": distance(org.get_coords(), storage.get_coords())
+            }
+        return HttpResponse(json.dumps(ans), content_type="application/json")
+    raise Http404()
+
 def distance(coords1, coords2):
     return sqrt((coords1[0] - coords2[0])**2 + (coords1[1] - coords2[1])**2)

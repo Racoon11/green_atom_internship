@@ -286,3 +286,28 @@ class ClosestStorageTestCase(TestCase):
         self.assertEqual(response.json(), {"name": "MHO-1",
                                            "free_space": {"bio": 40, "glass": 20, "plastic": 130}})
 
+
+class AllStoragesTestCase(TestCase):
+
+    def setUp(self):
+        c = Client()
+        c.post("/eco/create_org", {"name": "OO-1", "coord_x": 5, "coord_y": 5})
+
+        c.post("/eco/create_storage", {"name": "MHO-1", "coord_x": 2, "coord_y": 3,
+                                       "max_bio": 40, "max_glass": 20, "max_plastic": 130})
+        c.post("/eco/create_storage", {"name": "MHO-2", "coord_x": 15, "coord_y": 15,
+                                       "max_bio": 0, "max_glass": 60, "max_plastic": 130})
+
+    def test_storages(self):
+        c = Client()
+        response = c.get("/eco/storage/all", {"name": "OO-1"})
+        self.assertEqual(response.status_code, 200)
+        correct_ans = {'1': {"name": "MHO-1",
+                             "free_space": {"bio": 40.0, "glass": 20.0, "plastic": 130.0},
+                             "distance": 3.605551275463989},
+                       '2': {
+                           "name": "MHO-2",
+                           "free_space": {"bio": 0.0, "glass": 60.0, "plastic": 130.0},
+                           "distance": 14.142135623730951}
+                       }
+        self.assertEqual(response.json(), correct_ans)
