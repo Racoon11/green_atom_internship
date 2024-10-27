@@ -1,6 +1,6 @@
 from django.http import HttpResponse, Http404
 from django.http import HttpResponseBadRequest
-from .models import Storage, Organization
+from .models import Storage, Organization, Queue
 from django.shortcuts import get_object_or_404, render
 from django.middleware.csrf import get_token
 import json
@@ -47,6 +47,22 @@ def create_storage(request):
         st = Storage(name=name, coord_x=coord_x, coord_y=coord_y,
                      max_bio=max_bio, max_plastic=max_plastic, max_glass=max_glass)
         st.save()
+        if Queue.objects:
+            for obj in Queue.objects.order_by("-when_added"):
+                waste_type = obj.waste_type
+                free_space = st.get_free_space()
+                org = Organization.objects.filter(id=obj.organization_id_id).first()
+                if free_space[waste_type] > 0:
+                    real_amount = min(free_space[waste_type], obj.waste_amount)
+                    org.send_to_storage(waste_type, real_amount)
+                    st.store(waste_type, real_amount)
+                    if real_amount == obj.waste_amount:
+                        obj.delete()
+                    else:
+                        obj.waste_amount = real_amount
+                        obj.save()
+                    st.save()
+                    org.save()
         return HttpResponse(status=201)
     raise Http404("Page not found")
 
@@ -139,6 +155,9 @@ def send(request):
         answer = {}
         while amount:
             st = get_closest_storage(org.get_coords(), waste_type)
+            if st is None:
+                q = Queue(organization_id_id=org.id, waste_type=waste_type, waste_amount=amount)
+                q.save()
             if st is None and not answer:
                 raise Http404(f"No free storage")
             if st is None and answer:
@@ -192,6 +211,8 @@ def closest_storage(request):
 
 def get_all_storages(request):
     if request.method == "GET":
+        if "name" not in request.GET:
+            return HttpResponseBadRequest("Incorrect values")
         name = request.GET['name']
         org = Organization.objects.filter(name=name).first()
         if not org:
@@ -206,5 +227,17 @@ def get_all_storages(request):
         return HttpResponse(json.dumps(ans), content_type="application/json")
     raise Http404()
 
+
 def distance(coords1, coords2):
     return sqrt((coords1[0] - coords2[0])**2 + (coords1[1] - coords2[1])**2)
+
+
+def get_queue(request):
+    ans = {}
+    for q in Queue.objects.all():
+        ans[q.id] = {
+            "organization_id": q.organization_id_id,
+            "type": q.waste_type,
+            "amount": q.waste_amount
+        }
+    return HttpResponse(json.dumps(ans), content_type="application/json")

@@ -311,3 +311,43 @@ class AllStoragesTestCase(TestCase):
                            "distance": 14.142135623730951}
                        }
         self.assertEqual(response.json(), correct_ans)
+
+
+class QueueTestCase(TestCase):
+    def setUp(self):
+        c = Client()
+        c.post("/eco/create_org", {"name": "OO-1", "coord_x": 5, "coord_y": 5})
+
+        c.post("/eco/create_storage", {"name": "MHO-1", "coord_x": 2, "coord_y": 3,
+                                       "max_bio": 40, "max_glass": 20, "max_plastic": 130})
+
+    def test_send_to_queue(self):
+        c = Client()
+        c.post("/eco/generate", {"name": "OO-1",
+                                         "type": "bio", "amount": 70})
+        c.post("/eco/send_automatically",
+               {"name": "OO-1", "type": "bio"})
+        response = c.get("/eco/get_queue")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {'1': {
+            "organization_id": 1,
+            "type": "bio",
+            "amount": 30.0
+        }})
+
+    def test_new_organization_created(self):
+        c = Client()
+        c.post("/eco/generate", {"name": "OO-1",
+                                         "type": "bio", "amount": 70})
+        c.post("/eco/send_automatically",
+               {"name": "OO-1", "type": "bio"})
+        c.post("/eco/create_storage", {"name": "MHO-2", "coord_x": 2, "coord_y": 3,
+                                       "max_bio": 40, "max_glass": 20, "max_plastic": 130})
+
+        response = c.get("/eco/get_queue")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {})
+
+        response = c.get("/eco/storage/MHO-2/")
+        r = response.json()
+        self.assertEqual(r["cur_bio"], 30.0)

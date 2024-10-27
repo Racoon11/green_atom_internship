@@ -1,7 +1,9 @@
 from django.db import models
-
+from django.utils import timezone
 
 wastes = ['bio', 'glass', 'plastic']
+
+
 class Building(models.Model):
     coord_x = models.FloatField()
     coord_y = models.FloatField()
@@ -77,3 +79,10 @@ class Storage(Building):
         elif waste_type == 'plastic':
             self.cur_plastic += amount
         return True
+
+
+class Queue(models.Model):
+    organization_id = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    waste_type = models.CharField(max_length=30)
+    waste_amount = models.FloatField()
+    when_added = models.DateTimeField(default=timezone.now)
