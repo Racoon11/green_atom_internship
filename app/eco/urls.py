@@ -12,5 +12,6 @@ urlpatterns = [
     path("generate", views.generate),
     path("send_automatically", views.send, name='send_automatically'),
     path("closest_storage", views.closest_storage),
-    path("get_queue", views.get_queue)
+    path("get_queue", views.get_queue),
+    path("generate_and_send", views.generate_and_send)
 ]

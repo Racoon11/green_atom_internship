@@ -177,6 +177,13 @@ def send(request):
     raise Http404("Page not found")
 
 
+def generate_and_send(request):
+    resp = generate(request)
+    if resp.status_code != 200:
+        return resp
+    return send(request)
+
+
 def get_closest_storage(coords, free_waste=None):
     if not Storage.objects.all():
         return None
@@ -234,10 +241,12 @@ def distance(coords1, coords2):
 
 def get_queue(request):
     ans = {}
-    for q in Queue.objects.all():
+    for q in Queue.objects.order_by("-when_added"):
+        d = q.when_added
         ans[q.id] = {
-            "organization_id": q.organization_id_id,
+            "organization_name": Organization.objects.get(id=q.organization_id_id).name,
             "type": q.waste_type,
-            "amount": q.waste_amount
+            "amount": q.waste_amount,
+            "when_added": "{}.{}.{}".format(d.day, d.month, d.year)
         }
     return HttpResponse(json.dumps(ans), content_type="application/json")

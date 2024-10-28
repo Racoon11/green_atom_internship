@@ -150,6 +150,27 @@ HTTP Status:
     400 Bad Request 
 ```
 
+```textile
+Request Организация генерирует и сразу отправляет отходы
+(комбинирование двух предудущих запросов)
+    URI: /generate_and_send
+    HTTP Verb: POST
+    Body example: {
+        "name": "OO-1",
+        "type": "bio",
+        "amount": 12.4
+    }
+Response:
+HTTP Status:
+    200 OK Отходы были направлены в Хранилище, возвращаются хранилища и
+количество отходов, которое они смогли принять
+    Body example: {
+        "MHO-1": 12.4
+    }
+    404 Not Found (Organisation or storage not found)
+    400 Bad Request 
+```
+
 ```text
 Request Ближайшее свободное хранилище
     URI: /closest_storage
@@ -169,13 +190,18 @@ HTTP Status:
 ```
 
 ```text
-Request 
-    URI:
-    HTTP Verb: 
-    Body example: {
-        
-    }
+Request Получить текущую очередь
+    URI: /get_queue
+    HTTP Verb: GET
 Response:
 HTTP Status:
     200 OK
+    Body example: {"1":{
+                    "organization_name": "OO-1",
+                    "waste_type": "bio",
+                    "waste_amount": 12.3,
+                    "when_added": 12.09.2024
+                    }
+                    ...
+                   }
 ```
