@@ -200,7 +200,7 @@ HTTP Status:
                     "organization_name": "OO-1",
                     "waste_type": "bio",
                     "waste_amount": 12.3,
-                    "when_added": 12.09.2024
+                    "when_added": "12.09.2024"
                     }
                     ...
                    }
