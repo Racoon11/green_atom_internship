@@ -330,11 +330,12 @@ class QueueTestCase(TestCase):
                {"name": "OO-1", "type": "bio"})
         response = c.get("/eco/get_queue")
         self.assertEqual(response.status_code, 200)
+        t = timezone.now()
         self.assertEqual(response.json(), {'1': {
             "organization_name": "OO-1",
             "type": "bio",
             "amount": 30.0,
-            "when_added": "28.10.2024"
+            "when_added": "{}.{}.{}".format(t.day, t.month, t.year)
         }})
 
     def test_new_organization_created(self):
