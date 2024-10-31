@@ -6,6 +6,7 @@ API для системы учета отходов атом эко
 
 * Скачать папку app или клонировать репозиторий
 * В командной строке открыть директорию app
+* Выполнить pip install --upgrade poetry
 * Исполнить комнду: poetry install
 * Исполнить команду: poetry run python manage.py runserver
 * Запустить тесты командой: poetry run python manage.py test eco
